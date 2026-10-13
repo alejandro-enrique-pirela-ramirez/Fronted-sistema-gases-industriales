@@ -26,4 +26,12 @@ export class FacturaService {
   listarPorEstado(estado: string): Observable<FacturaResponse[]> {
     return this.http.get<FacturaResponse[]>(`${this.apiUrl}/estado/${estado}`);
   }
+
+  emitirLote(requests: FacturaRequest[]): Observable<{ encolados: number; mensaje: string }> {
+    return this.http.post<{ encolados: number; mensaje: string }>(`${this.apiUrl}/lote`, requests);
+  }
+
+  enviarPorCorreo(idFactura: number, correo: string): Observable<void> {
+    return this.http.post<void>(environment.apiEnvios, { idFactura, correo });
+  }
 }

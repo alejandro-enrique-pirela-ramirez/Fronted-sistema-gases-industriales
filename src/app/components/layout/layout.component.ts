@@ -32,18 +32,11 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
             </a>
           </nav>
         </div>
-        <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
-          Grupo 2 - DAW II
-        </div>
       </aside>
 
       <div class="flex-1 flex flex-col overflow-hidden">
         <header class="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center shadow-sm">
-          <span class="text-sm font-medium text-slate-600">Módulo de Facturación Electrónica</span>
-          <div class="flex items-center gap-3">
-            <span class="inline-block w-2.5 h-2.5 bg-green-500 rounded-full"></span>
-            <span class="text-xs text-slate-500">Conectado a Eureka</span>
-          </div>
+          <span class="text-sm font-medium text-slate-700">Módulo de Facturación Electrónica</span>
         </header>
 
         <main class="flex-1 overflow-y-auto p-8 bg-slate-100">

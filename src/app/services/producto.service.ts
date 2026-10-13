@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Producto } from '../models/producto.model';
+import { Producto, MovimientoStock } from '../models/producto.model';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -45,5 +45,9 @@ export class ProductoService {
       params = params.set('referencia', referencia);
     }
     return this.http.put<Producto>(`${this.apiUrl}/${id}/ingresar-stock`, null, { params });
+  }
+
+  obtenerMovimientos(id: number): Observable<MovimientoStock[]> {
+    return this.http.get<MovimientoStock[]>(`${this.apiUrl}/${id}/movimientos`);
   }
 }
