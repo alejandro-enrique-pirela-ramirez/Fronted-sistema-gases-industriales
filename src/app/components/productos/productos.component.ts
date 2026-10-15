@@ -2,6 +2,7 @@ import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductoService } from '../../services/producto.service';
+import { AuthService } from '../../services/auth.service';
 import { Producto, MovimientoStock } from '../../models/producto.model';
 
 @Component({
@@ -15,7 +16,7 @@ import { Producto, MovimientoStock } from '../../models/producto.model';
           <h2 class="text-2xl font-bold text-slate-800">Catálogo de Productos y Stock</h2>
           <p class="text-sm text-slate-500">Administración de gases industriales, precios y control de inventario.</p>
         </div>
-        <button (click)="abrirModalCrear()"
+        <button *ngIf="authService.isAdmin()" (click)="abrirModalCrear()"
                 class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition">
           + Nuevo Producto
         </button>
@@ -97,11 +98,11 @@ import { Producto, MovimientoStock } from '../../models/producto.model';
                           class="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-medium rounded transition">
                     Historial
                   </button>
-                  <button (click)="abrirModalStock(producto)"
+                  <button *ngIf="authService.isAdmin()" (click)="abrirModalStock(producto)"
                           class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded transition">
                     Stock
                   </button>
-                  <button (click)="eliminarProducto(producto)"
+                  <button *ngIf="authService.isAdmin()" (click)="eliminarProducto(producto)"
                           class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-medium rounded transition">
                     Eliminar
                   </button>
@@ -320,6 +321,7 @@ import { Producto, MovimientoStock } from '../../models/producto.model';
 })
 export class ProductosComponent implements OnInit {
   private productoService = inject(ProductoService);
+  public authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
 
   productos: Producto[] = [];

@@ -1,7 +1,9 @@
 export const environment = {
   production: false,
-  apiClientes: 'http://localhost:8097/api/clientes',
-  apiProductos: 'http://localhost:8098/api/productos',
-  apiFacturas: 'http://localhost:8099/api/facturas',
-  apiEnvios: 'http://localhost:8100/envios'
+  gatewayUrl: 'http://localhost:8090',
+  apiAuth: 'http://localhost:8090/api/v1/auth',
+  apiClientes: 'http://localhost:8090/api/clientes',
+  apiProductos: 'http://localhost:8090/api/productos',
+  apiFacturas: 'http://localhost:8090/api/facturas',
+  apiEnvios: 'http://localhost:8090/envios'
 };
