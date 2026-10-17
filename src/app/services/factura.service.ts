@@ -31,6 +31,14 @@ export class FacturaService {
     return this.http.post<{ encolados: number; mensaje: string }>(`${this.apiUrl}/lote`, requests);
   }
 
+  anular(id: number, motivo: string): Observable<FacturaResponse> {
+    return this.http.post<FacturaResponse>(`${this.apiUrl}/${id}/anular`, { motivo });
+  }
+
+  descargarPdf(id: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${id}/pdf`, { responseType: 'blob' });
+  }
+
   enviarPorCorreo(idFactura: number, correo: string): Observable<void> {
     return this.http.post<void>(environment.apiEnvios, { idFactura, correo });
   }

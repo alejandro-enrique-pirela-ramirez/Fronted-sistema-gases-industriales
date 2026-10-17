@@ -14,22 +14,34 @@ export interface FacturaRequest {
 }
 
 export interface DetalleFacturaResponse {
-  idDetalle?: number;
-  idProducto: number;
+  codigoProducto?: string;
+  descripcion?: string;
+  unidadMedida?: string;
   cantidad: number;
-  precioUnitario: number;
-  subtotal: number;
+  valorUnitario: number;
+  igv: number;
+  total: number;
 }
+
+export type EstadoFactura = 'PENDIENTE' | 'ACEPTADO' | 'RECHAZADO' | 'EXCEPCION' | 'ANULADO';
 
 export interface FacturaResponse {
   idFactura: number;
   serie: string;
-  numero: string;
+  numero: number;
   fechaEmision: string;
   idCliente: number;
+  clienteDenominacion?: string;
+  clienteNumeroDocumento?: string;
+  moneda?: string;
   subtotal: number;
   igv: number;
   total: number;
-  estado: string;
+  estado: EstadoFactura | string;
+  documentId?: string;
+  urlXml?: string;
+  urlCdr?: string;
+  urlPdf?: string;
+  mensajeSunat?: string;
   detalles: DetalleFacturaResponse[];
 }
