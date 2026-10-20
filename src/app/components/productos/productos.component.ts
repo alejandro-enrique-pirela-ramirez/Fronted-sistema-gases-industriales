@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ProductoService } from '../../services/producto.service';
 import { AuthService } from '../../services/auth.service';
 import { Producto, MovimientoStock } from '../../models/producto.model';
+import { confirmar } from '../../shared/confirm';
 
 @Component({
   selector: 'app-productos',
@@ -82,14 +83,14 @@ import { Producto, MovimientoStock } from '../../models/producto.model';
         </div>
 
         <div class="overflow-x-auto">
-          <table class="w-full min-w-[840px] table-fixed text-left text-sm text-slate-600">
+          <table class="w-full min-w-[890px] table-fixed text-left text-sm text-slate-600">
             <colgroup>
               <col />
               <col style="width: 100px" />
               <col style="width: 120px" />
               <col style="width: 150px" />
               <col style="width: 100px" />
-              <col style="width: 150px" />
+              <col style="width: 200px" />
             </colgroup>
             <thead class="bg-slate-50 text-slate-500 text-[11px] uppercase font-semibold tracking-wider">
               <tr>
@@ -151,6 +152,12 @@ import { Producto, MovimientoStock } from '../../models/producto.model';
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
                       </svg>
                     </button>
+                    <button *ngIf="authService.isAdmin()" (click)="abrirModalEditar(producto)" title="Editar producto" aria-label="Editar"
+                            class="w-9 h-9 inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                      </svg>
+                    </button>
                     <button *ngIf="authService.isAdmin()" (click)="eliminarProducto(producto)" title="Eliminar producto" aria-label="Eliminar"
                             class="w-9 h-9 inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -199,18 +206,20 @@ import { Producto, MovimientoStock } from '../../models/producto.model';
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4">
           <div class="flex justify-between items-center border-b border-slate-100 pb-3">
             <div>
-              <h3 class="text-lg font-bold text-slate-800">Registrar producto de gas</h3>
-              <p class="text-xs text-slate-500">Se enviará a SUNAT con su código de unidad.</p>
+              <h3 class="text-lg font-bold text-slate-800">{{ editandoProducto ? 'Editar producto' : 'Registrar producto de gas' }}</h3>
+              <p class="text-xs text-slate-500">{{ editandoProducto ? 'El stock se modifica desde "Ajustar stock".' : 'Se enviará a SUNAT con su código de unidad.' }}</p>
             </div>
             <button (click)="cerrarModalCrear()" class="text-slate-400 hover:text-slate-600 text-2xl leading-none">&times;</button>
           </div>
+
+          <div *ngIf="mensajeError" class="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg text-xs">{{ mensajeError }}</div>
 
           <div class="space-y-3">
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="block text-xs font-semibold text-slate-700 mb-1">Código</label>
-                <input [(ngModel)]="nuevoProducto.codigoProducto" placeholder="Ej: OX-IND-01"
-                       class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-mono" />
+                <input [(ngModel)]="nuevoProducto.codigoProducto" placeholder="Ej: OX-IND-01" [readOnly]="editandoProducto"
+                       class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-mono read-only:bg-slate-100 read-only:text-slate-500" />
               </div>
               <div>
                 <label class="block text-xs font-semibold text-slate-700 mb-1">Unidad de medida</label>
@@ -237,6 +246,11 @@ import { Producto, MovimientoStock } from '../../models/producto.model';
                      class="w-full border border-slate-300 rounded-lg p-2.5 text-sm" />
             </div>
 
+            <label *ngIf="editandoProducto" class="flex items-center gap-2 text-sm text-slate-700">
+              <input type="checkbox" [(ngModel)]="nuevoProducto.activo" class="rounded border-slate-300" />
+              Producto activo (disponible para facturar)
+            </label>
+
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="block text-xs font-semibold text-slate-700 mb-1">Precio unitario sin IGV (S/)</label>
@@ -244,9 +258,9 @@ import { Producto, MovimientoStock } from '../../models/producto.model';
                        class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-mono" />
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Stock inicial</label>
-                <input type="number" [(ngModel)]="nuevoProducto.stock" placeholder="0"
-                       class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-mono" />
+                <label class="block text-xs font-semibold text-slate-700 mb-1">{{ editandoProducto ? 'Stock actual' : 'Stock inicial' }}</label>
+                <input type="number" [(ngModel)]="nuevoProducto.stock" placeholder="0" [disabled]="editandoProducto"
+                       class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-mono disabled:bg-slate-100 disabled:text-slate-500" />
               </div>
             </div>
           </div>
@@ -257,7 +271,7 @@ import { Producto, MovimientoStock } from '../../models/producto.model';
             </button>
             <button (click)="guardarProducto()" [disabled]="guardando"
                     class="px-5 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50">
-              {{ guardando ? 'Guardando...' : 'Guardar' }}
+              {{ guardando ? 'Guardando...' : (editandoProducto ? 'Guardar cambios' : 'Guardar') }}
             </button>
           </div>
         </div>
@@ -442,6 +456,7 @@ export class ProductosComponent implements OnInit {
   }
 
   mostrarModalCrear = false;
+  editandoProducto = false;
   mostrarModalStock = false;
   mostrarModalMovimientos = false;
   cargandoMovimientos = false;
@@ -507,6 +522,7 @@ export class ProductosComponent implements OnInit {
   }
 
   abrirModalCrear(): void {
+    this.editandoProducto = false;
     this.mostrarModalCrear = true;
     this.mensajeExito = '';
     this.mensajeError = '';
@@ -521,6 +537,45 @@ export class ProductosComponent implements OnInit {
     };
   }
 
+  abrirModalEditar(producto: Producto): void {
+    this.editandoProducto = true;
+    this.nuevoProducto = { ...producto };
+    this.mensajeExito = '';
+    this.mensajeError = '';
+    this.mostrarModalCrear = true;
+    this.cdr.markForCheck();
+  }
+
+  private async confirmarYActualizarProducto(): Promise<void> {
+    const ok = await confirmar({
+      titulo: '¿Guardar cambios?',
+      texto: `Se actualizarán los datos de "${this.nuevoProducto.nombreProducto}".`,
+      confirmar: 'Sí, guardar',
+      peligro: false
+    });
+    if (!ok) return;
+
+    this.guardando = true;
+    this.mensajeExito = '';
+    this.mensajeError = '';
+    this.cdr.markForCheck();
+
+    this.productoService.actualizar(this.nuevoProducto).subscribe({
+      next: () => {
+        this.mensajeExito = 'Producto actualizado correctamente.';
+        this.guardando = false;
+        this.cerrarModalCrear();
+        this.cargarProductos();
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.mensajeError = err.error?.message || 'Error al actualizar el producto.';
+        this.guardando = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
   cerrarModalCrear(): void {
     this.mostrarModalCrear = false;
   }
@@ -528,6 +583,12 @@ export class ProductosComponent implements OnInit {
   guardarProducto(): void {
     if (!this.nuevoProducto.codigoProducto || !this.nuevoProducto.nombreProducto || this.nuevoProducto.precio <= 0) {
       this.mensajeError = 'Complete el código, nombre y un precio mayor a 0.';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    if (this.editandoProducto) {
+      this.confirmarYActualizarProducto();
       return;
     }
 
@@ -597,10 +658,19 @@ export class ProductosComponent implements OnInit {
     });
   }
 
-  eliminarProducto(producto: Producto): void {
+  async eliminarProducto(producto: Producto): Promise<void> {
     if (!producto.idProducto) return;
-    if (!confirm(`¿Desea eliminar el producto ${producto.nombreProducto}?`)) return;
 
+    const ok = await confirmar({
+      titulo: '¿Eliminar producto?',
+      texto: `Se quitará "${producto.nombreProducto}" (${producto.codigoProducto}) del catálogo.`,
+      confirmar: 'Sí, eliminar',
+      peligro: true
+    });
+    if (!ok) return;
+
+    this.mensajeExito = '';
+    this.mensajeError = '';
     this.productoService.eliminar(producto.idProducto).subscribe({
       next: () => {
         this.mensajeExito = 'Producto eliminado del catálogo.';
